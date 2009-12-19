@@ -9,6 +9,20 @@ from exc import HTTPUnauthorizedException, HTTPNotFoundException
 
 __version__ = 'X.Y.Z'
 
+class Room(object):
+    def __init__(self, campfire, room_id, data={}):
+        self._c = campfire
+        # The id of the room
+        self.id = room_id
+        # The raw data of the room
+        self.data = {}
+
+    def __repr__(self):
+        return "<Room: %s>" % self.id
+
+    def __eq__(self, other):
+        return self.id == other.id
+
 class Campfire(object):
     "Initialize a Campfire client with the given subdomain and token."
     def __init__(self, subdomain, token):
@@ -37,8 +51,9 @@ class Campfire(object):
 
     def room(self, room_id):
         "Returns the room info for the room with the given id."
-        return self._get("/room/%s" % room_id)['room']
-        
+        data = self._get("/room/%s" % room_id)['room']
+        return Room(self, room_id, data)
+
     def find_room_by_name(self, name):
         """Finds a Campfire room with the given name.
         
@@ -46,8 +61,8 @@ class Campfire(object):
         rooms = self.rooms()
         for room in rooms:
             if room['name'] == name:
-                return room
-        
+                return Room(self, room['id'], data=room)
+
     def _uri_for(self, path=''):
         return "%s/%s.json" % (urlparse.urlunparse(self.uri), path)
         
