@@ -1,5 +1,4 @@
 import json
-import urllib
 import urlparse
 import warnings
 
@@ -53,7 +52,7 @@ class Campfire(object):
         "Returns the rooms names available in the Campfire account"
         rooms = self._get('rooms')['rooms']
         return sorted([room['name'] for room in rooms])
-
+        
     def room(self, room_id):
         "Returns the room info for the room with the given id."
         data = self._get("/room/%s" % room_id)['room']
@@ -91,16 +90,16 @@ class Campfire(object):
         
     def _request(self, method, path, data={}, **options):
         headers = {}
-        headers['User-Agent'] = 'Pinder/%s' % __version__
-        headers['Content-Type'] = 'application/json'
+        headers['user-agent'] = 'Pinder/%s' % __version__
+        headers['content-type'] = 'application/json'
 
-        if method == 'GET':
+        if method in ('GET', 'POST', 'PUT', 'DELETE'):
             location = self._uri_for(path)
         else:
             raise Exception('Unsupported HTTP method: %s' % method)
 
         response, body = self._c.request(
-            location, method, urllib.urlencode(data), headers)
+            location, method, json.dumps(data), headers)
             
         if response.status == 401:
             raise HTTPUnauthorizedException(
