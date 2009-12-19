@@ -1,3 +1,4 @@
+import datetime
 import json
 import urlparse
 import warnings
@@ -24,6 +25,9 @@ class Room(object):
     def __eq__(self, other):
         return self.id == other.id
         
+    def _get(self, path):
+        return self._c._get("room/%s/%s" % (self.id, path))
+
     def _post(self, path):
         return self._c._post("room/%s/%s" % (self.id, path))
         
@@ -48,7 +52,12 @@ class Room(object):
     def users(self):
         "Get info about users chatting in the room."
         return self._c.users(self.data['name'])
-
+        
+    def transcript(self, date=None):
+        "Get the transcript for today or the given date (a datetime.date instance)."
+        date = datetime.date.today() or date
+        transcript_path = "transcript/%s/%s/%s" % (date.year, date.month, date.day)
+        return self._get(transcript_path)['messages']
 
 class Campfire(object):
     "Initialize a Campfire client with the given subdomain and token."
@@ -83,7 +92,7 @@ class Campfire(object):
         
     def room(self, room_id):
         "Returns the room info for the room with the given id."
-        data = self._get("/room/%s" % room_id)['room']
+        data = self._get("room/%s" % room_id)['room']
         return Room(self, room_id, data)
 
     def find_room_by_name(self, name):
