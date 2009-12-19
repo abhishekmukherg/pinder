@@ -21,13 +21,15 @@ class Campfire(object):
         self._c.add_credentials(token, 'X')
 
     def rooms(self):
-        """Returns the rooms available in the Campfire account.
+        "Returns the rooms available in the Campfire account"
+        return self._get('rooms')['rooms']
 
-        Returns a list of the names of the rooms."""
-        return self._get('rooms.json')['rooms']        
+    def room(self, room_id):
+        "Returns the room info for the room with the given id."
+        return self._get("/room/%s" % room_id)['room']
 
     def _uri_for(self, path=''):
-        return "%s/%s" % (urlparse.urlunparse(self.uri), path)
+        return "%s/%s.json" % (urlparse.urlunparse(self.uri), path)
         
     def _request(self, method, path, data={}, **options):
         headers = {}
@@ -40,7 +42,7 @@ class Campfire(object):
 
         response, body = self._c.request(
             location, method, urllib.urlencode(data), headers)
-
+            
         if response.status == 401:
             raise HTTPUnauthorizedException(
                 "You are not authorized to access the resource: '%s'" % path)
@@ -48,10 +50,10 @@ class Campfire(object):
             raise HTTPNotFoundException(
                 "The resource you are looking for does not exist (%s)" % path)
 
-        if body:
+        try:
             return json.loads(body)
-        else:
-            return ''
+        except ValueError, e:
+            raise Exception("Something did not work fine: %s" % str(e))
 
     def _post(self, path, data={}, **options):
         return self._request('POST', path, data, **options)
