@@ -1,7 +1,6 @@
 import datetime
 import json
 import urlparse
-import warnings
 
 import httplib2
 
@@ -31,10 +30,8 @@ class Room(object):
     def _post(self, path):
         return self._c._post("room/%s/%s" % (self.id, path))
         
-    def join(self, force=False):
+    def join(self):
         "Join the room."
-        if force:
-            warnings.warn("force is a deprecated parameter.", DeprecationWarning)
         self._post("join")
 
     def leave(self):
@@ -70,16 +67,6 @@ class Campfire(object):
         self._c = httplib2.Http(timeout=5)
         self._c.force_exception_to_status_code = True
         self._c.add_credentials(token, 'X')
-
-    def login(self, username, password):
-        msg = "login() is useless with the new API, it will be removed in the next release."
-        warnings.warn(msg, DeprecationWarning)
-        return True
-    
-    def logout(self):
-        msg = "logout() is useless with the new API, it will be removed in the next release."
-        warnings.warn(msg, DeprecationWarning)
-        return True
 
     def rooms(self):
         "Returns the rooms available in the Campfire account"
