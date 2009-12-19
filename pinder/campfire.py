@@ -9,18 +9,46 @@ from exc import HTTPUnauthorizedException, HTTPNotFoundException
 __version__ = 'X.Y.Z'
 
 class Room(object):
-    def __init__(self, campfire, room_id, data={}):
+    def __init__(self, campfire, room_id, data):
         self._c = campfire
         # The id of the room
         self.id = room_id
         # The raw data of the room
-        self.data = {}
+        self.data = data
+        # The name of the room
+        self.name = data["name"]
 
     def __repr__(self):
         return "<Room: %s>" % self.id
 
     def __eq__(self, other):
         return self.id == other.id
+        
+    def _post(self, path):
+        return self._c._post("room/%s/%s" % (self.id, path))
+        
+    def join(self, force=False):
+        "Join the room."
+        if force:
+            warnings.warn("force is a deprecated parameter.", DeprecationWarning)
+        self._post("join")
+
+    def leave(self):
+        "Leaves the room."
+        self._post("leave")
+        
+    def lock(self):
+        "Locks the room to prevent new users from entering."
+        self._post("lock")
+
+    def unlock(self):
+        "Unlocks the room."
+        self._post("unlock")
+
+    def users(self):
+        "Get info about users chatting in the room."
+        return self._c.users(self.data['name'])
+
 
 class Campfire(object):
     "Initialize a Campfire client with the given subdomain and token."
@@ -67,12 +95,12 @@ class Campfire(object):
             if room['name'] == name:
                 return Room(self, room['id'], data=room)
 
-    def users(self, *room_names):
+    def users(self, *rooms_ids):
         "Returns info about users chatting in any room or in the given room(s)."
         rooms = self.rooms()
         users = []
         for room in rooms:
-            if not room_names or room['name'] in room_names:
+            if not rooms_ids or room['id'] in rooms_ids:
                 if room.get('users'):
                     users.append(room.get('users'))
         return users
@@ -82,8 +110,12 @@ class Campfire(object):
         return self._get("users/%s" % user_id)
         
     def me(self):
-        "Returns info about the authenticated user"
+        "Returns info about the authenticated user."
         return self._get("users/me")['user']
+        
+    def search(self, term):
+        "Returns all the messages containing the given term."
+        return self._get("search/%s" % term)['messages']
 
     def _uri_for(self, path=''):
         return "%s/%s.json" % (urlparse.urlunparse(self.uri), path)
@@ -111,7 +143,8 @@ class Campfire(object):
         try:
             return json.loads(body)
         except ValueError, e:
-            raise Exception("Something did not work fine: %s" % str(e))
+            if response.status != 200:
+                raise Exception("Something did not work fine: %s" % str(e))
 
     def _post(self, path, data={}, **options):
         return self._request('POST', path, data, **options)
