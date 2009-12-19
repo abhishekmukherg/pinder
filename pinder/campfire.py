@@ -39,6 +39,15 @@ class Campfire(object):
         "Returns the room info for the room with the given id."
         return self._get("/room/%s" % room_id)['room']
         
+    def find_room_by_name(self, name):
+        """Finds a Campfire room with the given name.
+        
+        Returns a Room instance if found, None otherwise."""
+        rooms = self.rooms()
+        for room in rooms:
+            if room['name'] == name:
+                return room
+        
     def _uri_for(self, path=''):
         return "%s/%s.json" % (urlparse.urlunparse(self.uri), path)
         
