@@ -94,8 +94,11 @@ class Campfire(object):
             if response.status != 200:
                 raise Exception("Something did not work fine: %s" % str(e))
 
+    def _get(self, path=''):
+        return self._request('GET', path)
+
     def _post(self, path, data={}, **options):
         return self._request('POST', path, data, **options)
 
-    def _get(self, path=''):
-        return self._request('GET', path)
+    def _put(self, path, data={}, **options):
+        return self._request('PUT', path, data, **options)

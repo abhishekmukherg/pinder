@@ -16,12 +16,21 @@ class Room(object):
     def __eq__(self, other):
         return self.id == other.id
         
-    def _get(self, path):
-        return self._c._get("room/%s/%s" % (self.id, path))
+    def _path_for_room(self, path):
+        uri = 'room/%s' % self.id
+        if path:
+            uri = '%s/%s' % (uri, path)
+        return uri
+
+    def _get(self, path=''):
+        return self._c._get(self._path_for_room(path))
 
     def _post(self, path, data={}):
-        return self._c._post("room/%s/%s" % (self.id, path), data)
+        return self._c._post(self._path_for_room(path), data)
         
+    def _put(self, path, data={}):
+        return self._c._put(self._path_for_room(path), data)
+
     def _send(self, message, type='TextMessage'):
         data = {'message': {'body': message, 'type': type}}
         return self._post('speak', data)
@@ -36,6 +45,7 @@ class Room(object):
         
     def lock(self):
         "Locks the room to prevent new users from entering."
+        self.join()
         self._post("lock")
 
     def unlock(self):
@@ -48,12 +58,14 @@ class Room(object):
         
     def transcript(self, date=None):
         "Gets the transcript for today or the given date (a datetime.date instance)."
+        self.join()
         date = datetime.date.today() or date
         transcript_path = "transcript/%s/%s/%s" % (date.year, date.month, date.day)
         return self._get(transcript_path)['messages']
 
     def uploads(self):
         "Lists recently uploaded files."
+        self.join()
         return self._get('uploads')['uploads']
         
     def speak(self, message):
@@ -70,3 +82,8 @@ class Room(object):
         "Plays a sound into the room. Returns the message data."
         self.join()
         return self._send(message, type='SoundMessage')['message']
+    
+    def update(self, name, topic):
+        "Updates name and/or topic of the room."
+        data = {'room': {'name': name, 'topic': topic}}
+        self._put('', data)
