@@ -49,6 +49,11 @@ class Campfire(object):
         "Returns the rooms available in the Campfire account"
         return self._get('rooms')['rooms']
 
+    def rooms_names(self):
+        "Returns the rooms names available in the Campfire account"
+        rooms = self._get('rooms')['rooms']
+        return sorted([room['name'] for room in rooms])
+
     def room(self, room_id):
         "Returns the room info for the room with the given id."
         data = self._get("/room/%s" % room_id)['room']
@@ -63,12 +68,31 @@ class Campfire(object):
             if room['name'] == name:
                 return Room(self, room['id'], data=room)
 
+    def users(self, *room_names):
+        "Returns info about users chatting in any room or in the given room(s)."
+        rooms = self.rooms()
+        users = []
+        for room in rooms:
+            if not room_names or room['name'] in room_names:
+                if room.get('users'):
+                    users.append(room.get('users'))
+        return users
+        
+    def user(self, user_id):
+        "Returns info about the user with the given user_id."
+        return self._get("users/%s" % user_id)
+        
+    def me(self):
+        "Returns info about the authenticated user"
+        return self._get("users/me")['user']
+
     def _uri_for(self, path=''):
         return "%s/%s.json" % (urlparse.urlunparse(self.uri), path)
         
     def _request(self, method, path, data={}, **options):
         headers = {}
         headers['User-Agent'] = 'Pinder/%s' % __version__
+        headers['Content-Type'] = 'application/json'
 
         if method == 'GET':
             location = self._uri_for(path)
