@@ -19,9 +19,13 @@ class Room(object):
     def _get(self, path):
         return self._c._get("room/%s/%s" % (self.id, path))
 
-    def _post(self, path):
-        return self._c._post("room/%s/%s" % (self.id, path))
+    def _post(self, path, data={}):
+        return self._c._post("room/%s/%s" % (self.id, path), data)
         
+    def _send(self, message, type='TextMessage'):
+        data = {'message': {'body': message, 'type': type}}
+        return self._post('speak', data)
+
     def join(self):
         "Joins the room."
         self._post("join")
@@ -51,3 +55,18 @@ class Room(object):
     def uploads(self):
         "Lists recently uploaded files."
         return self._get('uploads')['uploads']
+        
+    def speak(self, message):
+        "Sends a message to the room. Returns the message data."
+        self.join()
+        return self._send(message, type='TextMessage')['message']
+
+    def paste(self, message):
+        "Pastes a message to the room. Returns the message data."
+        self.join()
+        return self._send(message, type='PasteMessage')['message']
+
+    def sound(self, message):
+        "Plays a sound into the room. Returns the message data."
+        self.join()
+        return self._send(message, type='SoundMessage')['message']
