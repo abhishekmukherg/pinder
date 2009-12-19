@@ -1,6 +1,7 @@
 import json
 import urllib
 import urlparse
+import warnings
 
 import httplib2
 
@@ -20,6 +21,16 @@ class Campfire(object):
         self._c.force_exception_to_status_code = True
         self._c.add_credentials(token, 'X')
 
+    def login(self, username, password):
+        msg = "login() is useless with the new API, it will be removed in the next release."
+        warnings.warn(msg, DeprecationWarning)
+        return True
+    
+    def logout(self):
+        msg = "logout() is useless with the new API, it will be removed in the next release."
+        warnings.warn(msg, DeprecationWarning)
+        return True
+
     def rooms(self):
         "Returns the rooms available in the Campfire account"
         return self._get('rooms')['rooms']
@@ -27,7 +38,7 @@ class Campfire(object):
     def room(self, room_id):
         "Returns the room info for the room with the given id."
         return self._get("/room/%s" % room_id)['room']
-
+        
     def _uri_for(self, path=''):
         return "%s/%s.json" % (urlparse.urlunparse(self.uri), path)
         
