@@ -1,4 +1,6 @@
+"Room object"
 import datetime
+
 
 class Room(object):
     def __init__(self, campfire, room_id, data):
@@ -22,14 +24,14 @@ class Room(object):
             uri = '%s/%s' % (uri, path)
         return uri
 
-    def _get(self, path=''):
-        return self._c._get(self._path_for_room(path))
+    def _get(self, path='', data={}, headers={}):
+        return self._c._get(self._path_for_room(path), data, headers)
 
-    def _post(self, path, data={}):
-        return self._c._post(self._path_for_room(path), data)
+    def _post(self, path, data={}, headers={}):
+        return self._c._post(self._path_for_room(path), data, headers)
         
-    def _put(self, path, data={}):
-        return self._c._put(self._path_for_room(path), data)
+    def _put(self, path, data={}, headers={}):
+        return self._c._put(self._path_for_room(path), data, headers)
 
     def _send(self, message, type='TextMessage'):
         data = {'message': {'body': message, 'type': type}}
@@ -57,10 +59,12 @@ class Room(object):
         return self._c.users(self.data['name'])
         
     def transcript(self, date=None):
-        "Gets the transcript for today or the given date (a datetime.date instance)."
+        ("Gets the transcript for today or the given date "
+        "(a datetime.date instance).")
         self.join()
         date = datetime.date.today() or date
-        transcript_path = "transcript/%s/%s/%s" % (date.year, date.month, date.day)
+        transcript_path = "transcript/%s/%s/%s" % (
+            date.year, date.month, date.day)
         return self._get(transcript_path)['messages']
 
     def uploads(self):

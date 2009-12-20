@@ -1,3 +1,4 @@
+"Campfire client"
 import json
 import urlparse
 
@@ -14,8 +15,9 @@ class Campfire(object):
         # The Campfire's subdomain.
         self.subdomain = subdomain
         self._token = token
-        # The U{urlparsed<http://docs.python.org/library/urlparse.html#urlparse.urlparse>} URI of the Campfire account.
-        self.uri = urlparse.urlparse("http://%s.campfirenow.com" % self.subdomain)
+        # The URI object of the Campfire account.
+        self.uri = urlparse.urlparse(
+            "http://%s.campfirenow.com" % self.subdomain)
         self._c = httplib2.Http(timeout=5)
         self._c.force_exception_to_status_code = True
         self._c.add_credentials(token, 'X')
@@ -44,7 +46,7 @@ class Campfire(object):
                 return Room(self, room['id'], data=room)
 
     def users(self, *rooms_ids):
-        "Returns info about users chatting in any room or in the given room(s)."
+        "Returns info about users in any room or in the given room(s)."
         rooms = self.rooms()
         users = []
         for room in rooms:
@@ -68,18 +70,21 @@ class Campfire(object):
     def _uri_for(self, path=''):
         return "%s/%s.json" % (urlparse.urlunparse(self.uri), path)
         
-    def _request(self, method, path, data={}, **options):
+    def _request(self, method, path, data={}, additional_headers={}):
+        data = json.dumps(data)
+        
         headers = {}
         headers['user-agent'] = 'Pinder/%s' % __version__
         headers['content-type'] = 'application/json'
+        headers['content-length'] = str(len(data))
+        headers.update(additional_headers)
 
         if method in ('GET', 'POST', 'PUT', 'DELETE'):
             location = self._uri_for(path)
         else:
             raise Exception('Unsupported HTTP method: %s' % method)
 
-        response, body = self._c.request(
-            location, method, json.dumps(data), headers)
+        response, body = self._c.request(location, method, data, headers)
             
         if response.status == 401:
             raise HTTPUnauthorizedException(
@@ -92,13 +97,14 @@ class Campfire(object):
             return json.loads(body)
         except ValueError, e:
             if response.status != 200:
-                raise Exception("Something did not work fine: %s" % str(e))
+                raise Exception("Something did not work fine: %s - %s" % (
+                    str(e), body))
 
-    def _get(self, path=''):
-        return self._request('GET', path)
+    def _get(self, path='', data={}, headers={}):
+        return self._request('GET', path, data, headers)
 
-    def _post(self, path, data={}, **options):
-        return self._request('POST', path, data, **options)
+    def _post(self, path, data={}, headers={}):
+        return self._request('POST', path, data, headers)
 
-    def _put(self, path, data={}, **options):
-        return self._request('PUT', path, data, **options)
+    def _put(self, path, data={}, headers={}):
+        return self._request('PUT', path, data, headers)
