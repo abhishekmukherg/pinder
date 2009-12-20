@@ -1,8 +1,11 @@
 "Campfire client"
-import json
+import httplib2
+try:
+    import json
+except ImportError:
+    import simplejson as json
 import urlparse
 
-import httplib2
 
 from exc import HTTPUnauthorizedException, HTTPNotFoundException
 from room import Room
