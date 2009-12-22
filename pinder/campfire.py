@@ -6,10 +6,11 @@ except ImportError:
     import simplejson as json
 import urlparse
 
-VERSION = "0.8b"
-
 from pinder.exc import HTTPUnauthorizedException, HTTPNotFoundException
 from pinder.room import Room
+
+VERSION = "0.8b"
+
 
 class Campfire(object):
     """Initialize a Campfire client with the given subdomain and token.
@@ -22,9 +23,9 @@ class Campfire(object):
         # The URI object of the Campfire account.
         self.uri = urlparse.urlparse(
             "%s://%s.campfirenow.com" % (schema, self.subdomain))
-        self._c = httplib2.Http(timeout=5)
-        self._c.force_exception_to_status_code = True
-        self._c.add_credentials(token, 'X')
+        self._http = httplib2.Http(timeout=5)
+        self._http.force_exception_to_status_code = True
+        self._http.add_credentials(token, 'X')
 
     def rooms(self):
         "Returns the rooms available in the Campfire account"
@@ -74,8 +75,9 @@ class Campfire(object):
     def _uri_for(self, path=''):
         return "%s/%s.json" % (urlparse.urlunparse(self.uri), path)
         
-    def _request(self, method, path, data={}, additional_headers={}):
-        data = json.dumps(data)
+    def _request(self, method, path, data=None, additional_headers=None):
+        additional_headers = additional_headers or dict()
+        data = json.dumps(data or dict())
         
         headers = {}
         headers['user-agent'] = 'Pinder/%s' % VERSION
@@ -88,7 +90,7 @@ class Campfire(object):
         else:
             raise Exception('Unsupported HTTP method: %s' % method)
 
-        response, body = self._c.request(location, method, data, headers)
+        response, body = self._http.request(location, method, data, headers)
             
         if response.status == 401:
             raise HTTPUnauthorizedException(
@@ -104,11 +106,11 @@ class Campfire(object):
                 raise Exception("Something did not work fine: %s - %s" % (
                     str(e), body))
 
-    def _get(self, path='', data={}, headers={}):
+    def _get(self, path='', data=None, headers=None):
         return self._request('GET', path, data, headers)
 
-    def _post(self, path, data={}, headers={}):
+    def _post(self, path, data=None, headers=None):
         return self._request('POST', path, data, headers)
 
-    def _put(self, path, data={}, headers={}):
+    def _put(self, path, data=None, headers=None):
         return self._request('PUT', path, data, headers)

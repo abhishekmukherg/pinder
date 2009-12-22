@@ -3,9 +3,9 @@ Pinder
 
 Pinder is a client library for Campfire, the chat application from 37Signals.
 """
-from campfire import Campfire, VERSION as __version__
-from room import Room
-from exc import HTTPUnauthorizedException, HTTPNotFoundException
+from pinder.campfire import Campfire, VERSION as __version__
+from pinder.room import Room
+from pinder.exc import HTTPUnauthorizedException, HTTPNotFoundException
 
 __author__ = "Lawrence Oluyede <l.oluyede@gmail.com>"
 __copyright__ = "Copyright (c) 2009, Lawrence Oluyede"

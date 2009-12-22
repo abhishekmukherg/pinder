@@ -1,3 +1,5 @@
+"Custom exceptions"
+
 
 class HTTPUnauthorizedException(Exception):
     pass

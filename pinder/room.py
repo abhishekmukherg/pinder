@@ -4,7 +4,7 @@ import datetime
 
 class Room(object):
     def __init__(self, campfire, room_id, data):
-        self._c = campfire
+        self._campfire = campfire
         # The id of the room
         self.id = room_id
         # The raw data of the room
@@ -23,18 +23,18 @@ class Room(object):
         if path:
             uri = '%s/%s' % (uri, path)
         return uri
+ 
+    def _get(self, path='', data=None, headers=None):
+        return self._campfire._get(self._path_for_room(path), data, headers)
 
-    def _get(self, path='', data={}, headers={}):
-        return self._c._get(self._path_for_room(path), data, headers)
-
-    def _post(self, path, data={}, headers={}):
-        return self._c._post(self._path_for_room(path), data, headers)
+    def _post(self, path, data=None, headers=None):
+        return self._campfire._post(self._path_for_room(path), data, headers)
         
-    def _put(self, path, data={}, headers={}):
-        return self._c._put(self._path_for_room(path), data, headers)
+    def _put(self, path, data=None, headers=None):
+        return self._campfire._put(self._path_for_room(path), data, headers)
 
-    def _send(self, message, type='TextMessage'):
-        data = {'message': {'body': message, 'type': type}}
+    def _send(self, message, type_='TextMessage'):
+        data = {'message': {'body': message, 'type': type_}}
         return self._post('speak', data)
 
     def join(self):
@@ -56,7 +56,7 @@ class Room(object):
 
     def users(self):
         "Gets info about users chatting in the room."
-        return self._c.users(self.data['name'])
+        return self._campfire.users(self.data['name'])
         
     def transcript(self, date=None):
         ("Gets the transcript for today or the given date "
@@ -75,17 +75,17 @@ class Room(object):
     def speak(self, message):
         "Sends a message to the room. Returns the message data."
         self.join()
-        return self._send(message, type='TextMessage')['message']
+        return self._send(message, type_='TextMessage')['message']
 
     def paste(self, message):
         "Pastes a message to the room. Returns the message data."
         self.join()
-        return self._send(message, type='PasteMessage')['message']
+        return self._send(message, type_='PasteMessage')['message']
 
     def sound(self, message):
         "Plays a sound into the room. Returns the message data."
         self.join()
-        return self._send(message, type='SoundMessage')['message']
+        return self._send(message, type_='SoundMessage')['message']
     
     def update(self, name, topic):
         "Updates name and/or topic of the room."
