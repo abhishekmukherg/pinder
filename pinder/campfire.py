@@ -12,14 +12,16 @@ from pinder.exc import HTTPUnauthorizedException, HTTPNotFoundException
 from pinder.room import Room
 
 class Campfire(object):
-    "Initialize a Campfire client with the given subdomain and token."
-    def __init__(self, subdomain, token):
+    """Initialize a Campfire client with the given subdomain and token.
+     Accepts a third boolean parameter to enable SSL (defaults to false)."""
+    def __init__(self, subdomain, token, ssl=False):
         # The Campfire's subdomain.
         self.subdomain = subdomain
         self._token = token
+        schema = ('http', 'https')[ssl==True]
         # The URI object of the Campfire account.
         self.uri = urlparse.urlparse(
-            "http://%s.campfirenow.com" % self.subdomain)
+            "%s://%s.campfirenow.com" % (schema, self.subdomain))
         self._c = httplib2.Http(timeout=5)
         self._c.force_exception_to_status_code = True
         self._c.add_credentials(token, 'X')
