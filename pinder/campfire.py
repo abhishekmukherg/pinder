@@ -6,11 +6,10 @@ except ImportError:
     import simplejson as json
 import urlparse
 
+VERSION = "0.8b"
 
-from exc import HTTPUnauthorizedException, HTTPNotFoundException
-from room import Room
-
-__version__ = 'X.Y.Z'
+from pinder.exc import HTTPUnauthorizedException, HTTPNotFoundException
+from pinder.room import Room
 
 class Campfire(object):
     "Initialize a Campfire client with the given subdomain and token."
@@ -77,7 +76,7 @@ class Campfire(object):
         data = json.dumps(data)
         
         headers = {}
-        headers['user-agent'] = 'Pinder/%s' % __version__
+        headers['user-agent'] = 'Pinder/%s' % VERSION
         headers['content-type'] = 'application/json'
         headers['content-length'] = str(len(data))
         headers.update(additional_headers)

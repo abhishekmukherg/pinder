@@ -7,3 +7,24 @@ You can find Campfire here: <http://www.campfirenow.com/>
 
 This is a new implementation with the official Campfire API:
 <http://developer.37signals.com/campfire>
+
+Requirements
+------------
+
+* `httplib2 <http://code.google.com/p/httplib2/>`_ >= 0.5.0
+* `simplejson <http://code.google.com/p/simplejson/>`_ (or the json module in Python 2.6)
+ 
+Documentation
+-------------
+
+See doc/usage.txt for usage documentation and doc/api/pinder.html for the API doc. There's also a FAQ in doc/faq.txt.
+
+Development version
+-------------------
+
+Get it from <http://github.com/rhymes/pinder>
+
+Contact
+-------
+
+Lawrence Oluyede <l.oluyede@gmail.com> - http://twitter.com/lawrenceoluyede
