@@ -17,7 +17,7 @@ Requirements
 Documentation
 -------------
 
-See doc/usage.txt for usage documentation and <http://dev.oluyede.org/pinder/api/> for modules documentation.
+See doc/usage.rst for usage documentation and <http://dev.oluyede.org/pinder/api/> for modules documentation.
 
 Development version
 -------------------
